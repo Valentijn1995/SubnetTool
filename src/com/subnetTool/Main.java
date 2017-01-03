@@ -19,7 +19,7 @@ public class Main
         MainFormListener handler = new MainFormHandler(parser, calcHashMap);
         MainForm mainForm = new MainForm(handler);
 
-        JFrame frame = new JFrame("IP Tool");
+        JFrame frame = new JFrame("Subnet Tool");
         frame.setContentPane(mainForm.getMainPanel());
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setMinimumSize(mainForm.getMainPanel().getMinimumSize());

@@ -14,3 +14,5 @@ hs_err_pid*
 # Custom rules
 out/
 SubnetTool.iml
+.idea/
+.DS_Store
