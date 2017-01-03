@@ -4,21 +4,17 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
-import java.lang.Exception;
-
 
 /**
- * Parses ipv4 and ipv6 addresses. Emits each described IP address as a
- * hexadecimal integer representing the address, the address space, and the port
- * number specified, if any.
+ * The IPParser is used to validate and convert IPv4 and IPv6 strings.
  */
 public class IPParser
 {
+
     /*
-     * Using regex to ensure that the address is a valid one. This allows for
-     * separating by format and ensures that the operations done on a format
-     * will be valid.
+     * The used regular expressions where taken from -> https://rosettacode.org/wiki/Parse_an_IP_Address#Java
      */
+
     // 0.0.0.0-255.255.255.255
     private final String ipv4segment =
             "(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])";
@@ -57,13 +53,26 @@ public class IPParser
             // IPv6 Address)
             "(" + ipv6segment + ":){1,4}:" + ipv4address + ")";
 
-
+    /**
+     * Each conversion function returns an IPAddress object.
+     * An IPAddress contains information about the parsed IP string.
+     * At first it contains the IP address in String form, but the object also
+     * provides a raw version of the address. The object also contains information about
+     * the address type (IPv4 or IPv6).
+     */
     public class IPAddress
     {
-        private String address;
-        private byte[] rawAddress;
-        private AddressSpace space;
+        private final String address;
+        private final byte[] rawAddress;
+        private final AddressSpace space;
 
+        /**
+         * Creates a new IPAddress object.
+         *
+         * @param address The address in String form
+         * @param rawAddress The address in raw form
+         * @param space The AddressSpace where the address belongs to
+         */
         public IPAddress(String address, byte[] rawAddress, AddressSpace space)
         {
             this.address = address;
@@ -71,23 +80,35 @@ public class IPParser
             this.space = space;
         }
 
+        /**
+         * Gets the address as a String.
+         */
         public String getAddress()
         {
             return address;
         }
 
+        /**
+         * Gets the address in the form of a byte array.
+         */
         public byte[] getRawAddress()
         {
             return rawAddress;
         }
 
+        /**
+         * Indicates which address space the address belongs to.
+         */
         public AddressSpace getAddressSpace()
         {
             return space;
         }
     }
 
-    public class ParseException extends Exception
+    /**
+     * Exception thrown when an address could not be parsed.
+     */
+    public class ParseException extends RuntimeException
     {
         public ParseException(String message)
         {
@@ -96,21 +117,20 @@ public class IPParser
     }
 
     /**
-     * Parses ipv4 and ipv6 addresses. Emits each described IP address as a
-     * hexadecimal integer representing the address, the address space, and the
-     * port number specified, if any.
+     * Parses ipv4 and ipv6 addresses. The code in this function was taken from
+     * -> https://rosettacode.org/wiki/Parse_an_IP_Address#Java
      *
-     * @param address the address to analyze
+     * Only the parsing of the port number was removed from the code.
+     *
+     * @param address The address to analyze
+     * @return A IPAddress object which contains the parse results
+     * @throws ParseException When the given address if not a valid address
      */
     public IPAddress parse(String address) throws ParseException
     {
+        AddressSpace space;
+        byte[] rawAddress;
 
-        // Used for storing values to be printed
-        AddressSpace space;// ipv4, ipv6, or unknown
-        byte[] rawAddress;// hex value of the address
-
-        // Try to match the pattern with one of the 2 types, with or without a
-        // port
         if (Pattern.matches("^" + ipv4address + "$", address))
         {
             InetAddress a;
@@ -148,15 +168,22 @@ public class IPParser
 
     }
 
+    /**
+     * Parses a given raw address.
+     *
+     * @param rawAddress The address to parse in bytes
+     * @return An IPAddress object with the parse results
+     * @throws ParseException When the given address if not a valid address
+     */
+
     public IPAddress parse(byte[] rawAddress) throws ParseException
     {
         InetAddress a;
         String address;
         AddressSpace space;
 
-        if (rawAddress.length == 16)
+        if (rawAddress.length == 16) //IPv6 address
         {
-            //IPv6 address
             space = AddressSpace.IPv6;
             try
             {
@@ -168,9 +195,8 @@ public class IPParser
                 throw new ParseException("Failed to parse given IPv6 address");
             }
         }
-        else if(rawAddress.length == 4)
+        else if(rawAddress.length == 4) //IPv4 address
         {
-            //IPv4 address
             space = AddressSpace.IPv4;
             try
             {

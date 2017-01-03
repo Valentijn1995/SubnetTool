@@ -1,7 +1,6 @@
 package com.subnetTool;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -31,17 +30,17 @@ public class MainForm
     private ChangeListener networkListener;
     private ChangeListener subnetListener;
 
-    public MainForm(MainFormListener listener)
+    public MainForm(MainFormHandler handler)
     {
         ipIsValid = false;
-        setUpIPField(listener);
-        setUpNetmaskSpinner(listener);
-        setUpSubNetSpinner(listener);
-        setUpNetworkSpinner(listener);
+        setUpIPField(handler);
+        setUpNetmaskSpinner();
+        setUpSubNetSpinner(handler);
+        setUpNetworkSpinner(handler);
 
     }
 
-    private void setUpIPField(MainFormListener listener)
+    private void setUpIPField(MainFormHandler listener)
     {
         final Color IP_FIELD_DEFAULT_COLOR = IPAddressField.getBackground();
 
@@ -72,50 +71,42 @@ public class MainForm
         });
     }
 
-    private void setUpNetmaskSpinner(MainFormListener listener)
+    private void setUpNetmaskSpinner()
     {
 
-        NetMaskSpiner.addChangeListener(new ChangeListener()
+        NetMaskSpiner.addChangeListener(e ->
         {
-            @Override
-            public void stateChanged(ChangeEvent e)
+            int newValue = (int) NetMaskSpiner.getValue();
+            if(newValue < 0)
             {
-                int newValue = (int) NetMaskSpiner.getValue();
-                if(newValue < 0)
-                {
-                    NetMaskSpiner.setValue(0);
-                }
+                NetMaskSpiner.setValue(0);
             }
         });
     }
 
-    private void setUpSubNetSpinner(MainFormListener listener)
+    private void setUpSubNetSpinner(MainFormHandler handler)
     {
-        subnetListener = new ChangeListener()
+        subnetListener = e ->
         {
-            @Override
-            public void stateChanged(ChangeEvent e)
+            int newValue = (int) SubnetSpinner.getValue();
+            if(newValue < 0)
             {
-                int newValue = (int) SubnetSpinner.getValue();
-                if(newValue < 0)
-                {
-                    SubnetSpinner.setValue(0);
-                }
-                else if (ipIsValid)
-                {
-                    String IPAddress = IPAddressField.getText();
-                    int netMask = (int) NetMaskSpiner.getValue();
-                    int subMask = newValue;
+                SubnetSpinner.setValue(0);
+            }
+            else if (ipIsValid)
+            {
+                String IPAddress = IPAddressField.getText();
+                int netMask = (int) NetMaskSpiner.getValue();
+                int subMask = newValue;
 
-                    String[] subnets = listener.calcSubnets(IPAddress, netMask, subMask);
+                String[] subnets = handler.calcSubnets(IPAddress, netMask, subMask);
 
-                    NetworkSpinner.removeChangeListener(networkListener);
-                    NetworkSpinner.setValue(subnets.length);
-                    NetworkSpinner.addChangeListener(networkListener);
+                NetworkSpinner.removeChangeListener(networkListener);
+                NetworkSpinner.setValue(subnets.length);
+                NetworkSpinner.addChangeListener(networkListener);
 
-                    updateSubnetList(subnets);
+                updateSubnetList(subnets);
 
-                }
             }
         };
 
@@ -123,34 +114,30 @@ public class MainForm
         SubnetSpinner.addChangeListener(subnetListener);
     }
 
-    private void setUpNetworkSpinner(MainFormListener listener)
+    private void setUpNetworkSpinner(MainFormHandler handler)
     {
-        networkListener = new ChangeListener()
+        networkListener = e ->
         {
-            @Override
-            public void stateChanged(ChangeEvent e)
+            int newValue = (int) NetworkSpinner.getValue();
+            if(newValue < 0)
             {
-                int newValue = (int) NetworkSpinner.getValue();
-                if(newValue < 0)
-                {
-                    NetworkSpinner.setValue(0);
-                }
-                else if (ipIsValid)
-                {
-                    String IPAddress = IPAddressField.getText();
-                    int netMask = (int) NetMaskSpiner.getValue();
-                    int networks = (int) NetworkSpinner.getValue();
+                NetworkSpinner.setValue(0);
+            }
+            else if (ipIsValid)
+            {
+                String IPAddress = IPAddressField.getText();
+                int netMask = (int) NetMaskSpiner.getValue();
+                int networks = (int) NetworkSpinner.getValue();
 
-                    int newSubnetMask = listener.calcSubnetMask(IPAddress, netMask, networks);
-                    String[] subnets = listener.calcSubnets(IPAddress, netMask, newSubnetMask);
+                int newSubnetMask = handler.calcSubnetMask(netMask, networks);
+                String[] subnets = handler.calcSubnets(IPAddress, netMask, newSubnetMask);
 
-                    SubnetSpinner.removeChangeListener(subnetListener);
-                    SubnetSpinner.setValue(newSubnetMask);
-                    SubnetSpinner.addChangeListener(subnetListener);
+                SubnetSpinner.removeChangeListener(subnetListener);
+                SubnetSpinner.setValue(newSubnetMask);
+                SubnetSpinner.addChangeListener(subnetListener);
 
-                    updateSubnetList(subnets);
+                updateSubnetList(subnets);
 
-                }
             }
         };
 

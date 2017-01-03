@@ -18,58 +18,8 @@ public class SubnetCalculator
         ADDRESS_LEN_IN_BITS = ADDRESS_LEN * BYTE_LEN;
     }
 
-    public byte[] convertCIDRToByteMask(int CIDR) throws IllegalArgumentException
-    {
-        if (CIDR > (ADDRESS_LEN * BYTE_LEN))
-        {
-            throw new IllegalArgumentException("CIDR submask can not be bigger than the length of the address");
-        }
 
-        byte[] byteMask = new byte[ADDRESS_LEN];
-        int fullBytes = CIDR / BYTE_LEN;
-        int remainer = CIDR % BYTE_LEN;
-        for (int i = 0; i < fullBytes; i++)
-        {
-            byteMask[i] = (byte) 0xff;
-        }
-        byteMask[fullBytes + 1] = (byte) (~(0xff >> remainer));
-        return byteMask;
-
-    }
-
-    public int convertByteToCIDRMask(byte[] submask) throws IllegalArgumentException
-    {
-        if (submask.length != ADDRESS_LEN)
-        {
-            throw new IllegalArgumentException("Given submask must be the same length as the configured address " +
-                    "length for this SubnetCalculator object");
-        }
-
-        int submaskCount = 0;
-
-        for(int byteCounter = 0; byteCounter < submask.length; byteCounter++)
-        {
-            byte currentByte = submask[byteCounter];
-            for (int bitCounter = 0; bitCounter < BYTE_LEN; bitCounter++)
-            {
-                boolean isBitSet = (currentByte & (1 << bitCounter)) != 0;
-                if(isBitSet)
-                {
-                    submaskCount++;
-                }
-                else
-                {
-                    return submaskCount;
-                }
-            }
-        }
-        return submaskCount;
-
-    }
-
-
-
-    public byte[][] calcSubnetsForNetwork(byte[] networkIP, int netMask, int subnetMask) throws IllegalArgumentException
+    public byte[][] calcSubnetsForNetwork(byte[] networkIP, int netMask, int subnetMask)
     {
         if(networkIP.length != this.ADDRESS_LEN)
         {
@@ -107,14 +57,22 @@ public class SubnetCalculator
 
     public static int calcSubnetMaskForNetwork(int netMask, int minimumSubnets)
     {
+        if(minimumSubnets < 1)
+        {
+            throw new IllegalArgumentException("Amount of minimum subnet's must be one or higher");
+        }
+        else if(netMask < 1)
+        {
+            throw new IllegalArgumentException("NetMask must be one or higher");
+        }
+
         int exponentCounter = 1;
         while(true)
         {
             int subnets = ((int)Math.pow(2, exponentCounter) - 2);
             if (subnets >= minimumSubnets)
             {
-                int subnetMask = netMask + exponentCounter;
-                return subnetMask;
+                return netMask + exponentCounter;
             }
             else
             {

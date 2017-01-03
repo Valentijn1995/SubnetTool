@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * Created by valentijn on 09-12-16.
  */
-public class MainFormHandler implements MainFormListener
+public class MainFormHandler
 {
     private final IPParser parser;
     private final HashMap<AddressSpace, SubnetCalculator> calculators;
@@ -16,7 +16,6 @@ public class MainFormHandler implements MainFormListener
         this.calculators = calculators;
     }
 
-    @Override
     public boolean isValidIP(String IPToValidate)
     {
         try
@@ -31,7 +30,6 @@ public class MainFormHandler implements MainFormListener
 
     }
 
-    @Override
     public String[] calcSubnets(String IP, int netMask, int subnetMask)
     {
         try
@@ -52,8 +50,7 @@ public class MainFormHandler implements MainFormListener
         }
     }
 
-    @Override
-    public int calcSubnetMask(String IP, int netMask, int amountOfNetworks)
+    public int calcSubnetMask(int netMask, int amountOfNetworks)
     {
         int subnetMask = SubnetCalculator.calcSubnetMaskForNetwork(netMask, amountOfNetworks);
         return subnetMask;
